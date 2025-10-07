@@ -1,7 +1,7 @@
 import os
-from typing import List
+from typing import Any, Dict, List, Tuple, Union
 
-from crewai import LLM, Agent, Crew, Process, Task
+from crewai import LLM, Agent, Crew, Process, Task, TaskOutput
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.project import CrewBase, agent, crew, task
@@ -9,6 +9,26 @@ from crewai.project import CrewBase, agent, crew, task
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
 # https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+
+
+def validate_content_length(result: TaskOutput) -> Tuple[bool, Any]:
+    """Validate that the content meets requirements."""
+    try:
+        # Extract the actual content string from TaskOutput
+        content = result.raw if hasattr(result, "raw") else str(result)
+
+        # Check word count
+        word_count = len(content.split())
+        if word_count > 800:
+            return (
+                False,
+                "Blog content exceeds 800 words, it should be less than 800 words",
+            )
+
+        # Additional validation logic here
+        return (True, content.strip())
+    except Exception as e:
+        return (False, f"Unexpected error during validation: {str(e)}")
 
 
 @CrewBase
@@ -29,12 +49,6 @@ class CrewaiTrainigStepByStep:
         ]
     )
 
-    # Learn more about YAML configuration files here:
-    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
-    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
-
-    # If you would like to add tools to your agents, you can learn more about it here:
-    # https://docs.crewai.com/concepts/agents#agent-tools
     @agent
     def researcher(self) -> Agent:
         return Agent(
@@ -46,12 +60,9 @@ class CrewaiTrainigStepByStep:
     def reporting_analyst(self) -> Agent:
         return Agent(
             from_repository="reporting-analyst",
-            knowledge_sources=[self.text_source],
+            # knowledge_sources=[self.text_source],
         )
 
-    # To learn more about structured task outputs,
-    # task dependencies, and task callbacks, check out the documentation:
-    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
     @task
     def research_task(self) -> Task:
         return Task(
@@ -63,6 +74,7 @@ class CrewaiTrainigStepByStep:
         return Task(
             config=self.tasks_config["reporting_task"],  # type: ignore[index]
             output_file="report.md",
+            guardrail=validate_content_length,
         )
 
     @crew

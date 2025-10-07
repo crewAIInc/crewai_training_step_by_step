@@ -9,9 +9,8 @@ research_task:
 
 reporting_task:
   description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
+    Review the context you got and syntetize it into a report of maximum 800 words, be concise and to the point.
+    Make sure the report contains all relevant information.
   expected_output: >
-    A fully fledged report with the main topics, each with a full section of information.
-    Formatted as markdown without '```'
+    A full report with maximum 800 words. Formatted as markdown without '```'
   agent: reporting_analyst
