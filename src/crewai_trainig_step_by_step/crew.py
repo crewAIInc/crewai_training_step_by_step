@@ -1,7 +1,9 @@
+import os
 from typing import List
 
-from crewai import Agent, Crew, Process, Task
+from crewai import LLM, Agent, Crew, Process, Task
 from crewai.agents.agent_builder.base_agent import BaseAgent
+from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.project import CrewBase, agent, crew, task
 
 # If you want to run a snippet of code before or after the crew starts,
@@ -15,6 +17,17 @@ class CrewaiTrainigStepByStep:
 
     agents: List[BaseAgent]
     tasks: List[Task]
+
+    llm = LLM(
+        model=os.getenv("MODEL"),
+        temperature=0.2,
+    )
+
+    text_source = TextFileKnowledgeSource(
+        file_paths=[
+            "user_preference.txt",
+        ]
+    )
 
     # Learn more about YAML configuration files here:
     # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
@@ -31,7 +44,10 @@ class CrewaiTrainigStepByStep:
 
     @agent
     def reporting_analyst(self) -> Agent:
-        return Agent(from_repository="reporting-analyst")
+        return Agent(
+            from_repository="reporting-analyst",
+            knowledge_sources=[self.text_source],
+        )
 
     # To learn more about structured task outputs,
     # task dependencies, and task callbacks, check out the documentation:
@@ -60,6 +76,7 @@ class CrewaiTrainigStepByStep:
             tasks=self.tasks,  # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
-            memory=True,
+            # memory=True,
+            llm=self.llm,
             # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
         )

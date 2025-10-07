@@ -1,4 +1,5 @@
-User name is John Doe.
-User is an AI Engineer.
+User name is Nicola Croon
+User is Forward deployed engineer.
 User is interested in AI Agents.
-User is based in San Francisco, California.
+User is based in Barcelona, Spain.
+User is passionate about CrewAI as Agentic framework and wants to know everything about it.
