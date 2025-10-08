@@ -1,14 +1,10 @@
 import os
 from typing import Any, Dict, List, Tuple, Union
 
-from crewai import LLM, Agent, Crew, Process, Task, TaskOutput
+from crewai import LLM, Agent, Crew, LLMGuardrail, Process, Task, TaskOutput
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.project import CrewBase, agent, crew, task
-
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
 
 
 def validate_content_length(result: TaskOutput) -> Tuple[bool, Any]:
@@ -19,10 +15,10 @@ def validate_content_length(result: TaskOutput) -> Tuple[bool, Any]:
 
         # Check word count
         word_count = len(content.split())
-        if word_count > 800:
+        if word_count > 1500:
             return (
                 False,
-                "Blog content exceeds 800 words, it should be less than 800 words",
+                "Blog content exceeds 1500 words, it should be less than 1500 words",
             )
 
         # Additional validation logic here
@@ -60,13 +56,17 @@ class CrewaiTrainigStepByStep:
     def reporting_analyst(self) -> Agent:
         return Agent(
             from_repository="reporting-analyst",
-            # knowledge_sources=[self.text_source],
+            knowledge_sources=[self.text_source],
         )
 
     @task
     def research_task(self) -> Task:
         return Task(
             config=self.tasks_config["research_task"],  # type: ignore[index]
+            guardrail=LLMGuardrail(
+                description="The research task should be detailed and strictly related to the topic.",
+                llm=LLM(model="gpt-4.1-mini", temperature=0.2),
+            ),
         )
 
     @task
@@ -80,8 +80,6 @@ class CrewaiTrainigStepByStep:
     @crew
     def crew(self) -> Crew:
         """Creates the CrewaiTrainigStepByStep crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
 
         return Crew(
             agents=self.agents,  # Automatically created by the @agent decorator
