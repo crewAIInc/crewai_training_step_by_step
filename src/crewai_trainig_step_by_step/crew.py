@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, List, Tuple
 
 from crewai import (
     LLM,
@@ -14,9 +14,16 @@ from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.project import CrewBase, after_kickoff, agent, before_kickoff, crew, task
 from crewai_tools import SerperDevTool
+from pydantic import BaseModel
 
 # from crewai_trainig_step_by_step.tools.serper_scraper_tool import SerperScrapeTool
 from serper_scrape_tool.tool import SerperScrapeTool
+
+
+class SummarizationOutput(BaseModel):
+    topic: str
+    summary: str
+    key_points: List[str]
 
 
 def validate_content_length(result: TaskOutput) -> Tuple[bool, Any]:
@@ -74,8 +81,8 @@ class CrewaiTrainigStepByStep:
         # This method is often used to save the results to a file or any other storage.
         # More in general, it is used to perform any action after the crew has finished executing.
         # In this case, we are logging the results to the console.
-        print("Crew execution completed with result:", result)
-        return result
+        print("Crew execution completed with result:", result.json)
+        return result.json
 
     @agent
     def researcher(self) -> Agent:
@@ -109,6 +116,13 @@ class CrewaiTrainigStepByStep:
             config=self.tasks_config["reporting_task"],  # type: ignore[index]
             output_file="report.md",
             guardrail=validate_content_length,
+        )
+
+    @task
+    def summarization_task(self) -> Task:
+        return Task(
+            config=self.tasks_config["summarization_task"],  # type: ignore[index]
+            output_json=SummarizationOutput,
         )
 
     @crew

@@ -14,3 +14,10 @@ reporting_task:
   expected_output: >
     A full report with maximum 800 words. Formatted as markdown without '```'
   agent: reporting_analyst
+
+summarization_task:
+  description: >
+    Summarize the content of the report in a short summary.
+  expected_output: >
+    A structured output with all required information.
+  agent: reporting_analyst
