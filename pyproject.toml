@@ -8,6 +8,7 @@ dependencies = [
     "crewai[tools]==0.201.1",
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
+    "serper-scrape-tool>=0.1.0",
 ]
 
 [project.scripts]
@@ -21,5 +22,12 @@ test = "crewai_trainig_step_by_step.main:test"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[[tool.uv.index]]
+name = "jet-skis-training-crewai-7ddc9aa2"
+url = "https://app.crewai.com/pypi/jet-skis-training-crewai-7ddc9aa2"
+
 [tool.crewai]
 type = "crew"
+
+[tool.uv.sources]
+serper-scrape-tool = { index = "jet-skis-training-crewai-7ddc9aa2" }

@@ -15,7 +15,8 @@ from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledge
 from crewai.project import CrewBase, after_kickoff, agent, before_kickoff, crew, task
 from crewai_tools import SerperDevTool
 
-from crewai_trainig_step_by_step.tools.custom_tool import SerperScrapeTool
+# from crewai_trainig_step_by_step.tools.custom_tool import SerperScrapeTool
+from serper_scrape_tool.tool import SerperScrapeTool
 
 
 def validate_content_length(result: TaskOutput) -> Tuple[bool, Any]:

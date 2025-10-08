@@ -85,20 +85,3 @@ class SerperScrapeTool(BaseTool):
             return f"JSON parsing error from Serper API: {str(e)}"
         except Exception as e:
             return f"Unexpected error while scraping {url}: {str(e)}"
-
-
-# Keep the original tool for backward compatibility
-class MyCustomToolInput(BaseModel):
-    """Input schema for MyCustomTool."""
-
-    argument: str = Field(..., description="Description of the argument.")
-
-
-class MyCustomTool(BaseTool):
-    name: str = "Legacy Custom Tool"
-    description: str = "Legacy tool for backward compatibility. Use SerperScrapeTool instead for web scraping."
-    args_schema: Type[BaseModel] = MyCustomToolInput
-
-    def _run(self, argument: str) -> str:
-        # Implementation goes here
-        return "This is the legacy tool. Consider using SerperScrapeTool for web scraping tasks."

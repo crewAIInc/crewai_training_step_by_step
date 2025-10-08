@@ -3,7 +3,8 @@ revision = 3
 requires-python = ">=3.10, <3.14"
 resolution-markers = [
     "python_full_version >= '3.13'",
-    "python_full_version >= '3.11' and python_full_version < '3.13'",
+    "python_full_version == '3.12.*'",
+    "python_full_version == '3.11.*'",
     "python_full_version < '3.11'",
 ]
 
@@ -594,6 +595,7 @@ dependencies = [
     { name = "crewai", extra = ["tools"] },
     { name = "python-dotenv" },
     { name = "requests" },
+    { name = "serper-scrape-tool" },
 ]
 
 [package.metadata]
@@ -601,6 +603,7 @@ requires-dist = [
     { name = "crewai", extras = ["tools"], specifier = "==0.201.1" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "requests", specifier = ">=2.32.5" },
+    { name = "serper-scrape-tool", specifier = ">=0.1.0", index = "https://app.crewai.com/pypi/jet-skis-training-crewai-7ddc9aa2" },
 ]
 
 [[package]]
@@ -1203,7 +1206,8 @@ version = "9.6.0"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.13'",
-    "python_full_version >= '3.11' and python_full_version < '3.13'",
+    "python_full_version == '3.12.*'",
+    "python_full_version == '3.11.*'",
 ]
 dependencies = [
     { name = "colorama", marker = "python_full_version >= '3.11' and sys_platform == 'win32'" },
@@ -1878,7 +1882,8 @@ version = "3.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.13'",
-    "python_full_version >= '3.11' and python_full_version < '3.13'",
+    "python_full_version == '3.12.*'",
+    "python_full_version == '3.11.*'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/6c/4f/ccdb8ad3a38e583f214547fd2f7ff1fc160c43a75af88e6aec213404b96a/networkx-3.5.tar.gz", hash = "sha256:d4c6f9cf81f52d69230866796b82afbccdec3db7ae4fbd1b65ea750feed50037", size = 2471065, upload-time = "2025-05-29T11:35:07.804Z" }
 wheels = [
@@ -1956,7 +1961,8 @@ version = "2.3.3"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "python_full_version >= '3.13'",
-    "python_full_version >= '3.11' and python_full_version < '3.13'",
+    "python_full_version == '3.12.*'",
+    "python_full_version == '3.11.*'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/d0/19/95b3d357407220ed24c139018d2518fab0a61a948e68286a25f1a4d049ff/numpy-2.3.3.tar.gz", hash = "sha256:ddc7c39727ba62b80dfdbedf400d1c10ddfa8eefbd7ec8dcb118be8b56d31029", size = 20576648, upload-time = "2025-09-09T16:54:12.543Z" }
 wheels = [
@@ -3372,6 +3378,17 @@ sdist = { url = "https://files.pythonhosted.org/packages/da/8a/22b7beea3ee0d44b1
 wheels = [
     { url = "https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl", hash = "sha256:68635866661c6836b8d39430f97a996acbd61bfa49406748ea243539fe239762", size = 34696, upload-time = "2025-04-16T09:51:17.142Z" },
 ]
+
+[[package]]
+name = "serper-scrape-tool"
+version = "0.1.0"
+source = { registry = "https://app.crewai.com/pypi/jet-skis-training-crewai-7ddc9aa2" }
+dependencies = [
+    { name = "crewai", extra = ["tools"] },
+    { name = "python-dotenv" },
+    { name = "requests" },
+]
+sdist = { url = "https://app.crewai.com/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsiZGF0YSI6MTU1NTU3LCJwdXIiOiJibG9iX2lkIn19--7356ea7c37ce08e5e69e3a15a60fa1778f9e4c5c/serper-scrape-tool-0.1.0.tar.gz?disposition=attachment" }
 
 [[package]]
 name = "shellingham"
