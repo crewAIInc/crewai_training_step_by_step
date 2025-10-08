@@ -13,6 +13,9 @@ from crewai import (
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.project import CrewBase, after_kickoff, agent, before_kickoff, crew, task
+from crewai_tools import SerperDevTool
+
+from crewai_trainig_step_by_step.tools.custom_tool import SerperScrapeTool
 
 
 def validate_content_length(result: TaskOutput) -> Tuple[bool, Any]:
@@ -78,6 +81,7 @@ class CrewaiTrainigStepByStep:
         return Agent(
             config=self.agents_config["researcher"],  # type: ignore[index]
             verbose=True,
+            tools=[SerperScrapeTool(), SerperDevTool()],
         )
 
     @agent
