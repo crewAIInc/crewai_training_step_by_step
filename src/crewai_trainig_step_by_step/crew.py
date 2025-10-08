@@ -90,6 +90,7 @@ class CrewaiTrainigStepByStep:
         return Agent(
             from_repository="reporting-analyst",
             knowledge_sources=[self.text_source],
+            reasoning=True,
         )
 
     @task
