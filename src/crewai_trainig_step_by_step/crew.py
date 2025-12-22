@@ -1,56 +1,26 @@
-import os
-from typing import Any, List, Tuple
+from typing import List
 
-from crewai import (
-    LLM,
-    Agent,
-    Crew,
-    LLMGuardrail,
-    Process,
-    Task,
-    TaskOutput,
-)
+from crewai import LLM, Agent, Crew, LLMGuardrail, Process, Task
 from crewai.agents.agent_builder.base_agent import BaseAgent
-
-# from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 from crewai.project import CrewBase, after_kickoff, agent, before_kickoff, crew, task
 from crewai_tools import SerperDevTool
 from pydantic import BaseModel
 
+from crewai_trainig_step_by_step.listener import CrewTrainingBus
 from crewai_trainig_step_by_step.tools.serper_scraper_tool import SerperScrapeTool
+from crewai.knowledge.source.text_file_knowledge_source import TextFileKnowledgeSource
 
-# from serper_scrape_tool.tool import SerperScrapeTool
 from eval import EvalListenerSetup
 
-# from openai_compatible_embedding_wrapper import get_embedder_config
+from crewai_trainig_step_by_step.llm import asimov_llm, embedding_model
 
 eval_listener = EvalListenerSetup()
-
+training_listener = CrewTrainingBus()
 
 class SummarizationOutput(BaseModel):
     topic: str
     summary: str
     key_points: List[str]
-
-
-def validate_content_length(result: TaskOutput) -> Tuple[bool, Any]:
-    """Validate that the content meets requirements."""
-    try:
-        # Extract the actual content string from TaskOutput
-        content = result.raw if hasattr(result, "raw") else str(result)
-
-        # Check word count
-        word_count = len(content.split())
-        if word_count > 1500:
-            return (
-                False,
-                "Blog content exceeds 1500 words, it should be less than 1500 words",
-            )
-
-        # Additional validation logic here
-        return (True, content.strip())
-    except Exception as e:
-        return (False, f"Unexpected error during validation: {str(e)}")
 
 
 @CrewBase
@@ -60,61 +30,63 @@ class CrewaiTrainigStepByStep:
     agents: List[BaseAgent]
     tasks: List[Task]
 
-    # text_source = TextFileKnowledgeSource(
-    #     file_paths=[
-    #         "user_preference.txt",
-    #     ]
-    # )
+    llm: LLM = asimov_llm
 
-    @before_kickoff
-    def prepare_inputs(self, inputs):
-        # Preprocess or modify inputs, that will be accessible in the 'inputs'
-        # parameter of the crew. In our case, we have two inputs: topic and current_year.
-        # Let's modify slightly the topic, by overriding it with an hardcoded option.
-        # This method is often used to fetch external data such as s3 or any
-        # other cloud bucket.
+    # @before_kickoff
+    # def prepare_inputs(self, inputs):
+    #     # Preprocess or modify inputs, that will be accessible in the 'inputs'
+    #     # parameter of the crew. In our case, we have two inputs: topic and current_year.
+    #     # Let's modify slightly the topic, by overriding it with an hardcoded option.
+    #     # This method is often used to fetch external data such as s3 or any
+    #     # other cloud bucket.
+    #
+    #     inputs["topic"] = "Agentic AI Stacks: Why CrewAI is the best option."
+    #
+    #     return inputs
+    #
+    # @after_kickoff
+    # def log_results(self, result):
+    #     # This method is often used to save the results to a file or any other storage.
+    #     # More in general, it is used to perform any action after the crew has finished executing.
+    #     # In this case, we are logging the results to the console.
+    #     print("Crew execution completed with result:", result.json)
+    #     return result.json
 
-        inputs["topic"] = "Agentic AI Stacks: Why CrewAI is the best option."
+    def manager_agent(self) -> Agent:
+        return Agent(
+            role="manager",
+            goal="Oversee the research and reporting process on the given topic.",
+            backstory="You are an experienced project manager skilled in coordinating research and reporting tasks.",
+            verbose=True,
+            allow_delegation=True,
+            reasoning=True,
+            llm=self.llm,
+        )
 
-        return inputs
 
-    @after_kickoff
-    def log_results(self, result):
-        # This method is often used to save the results to a file or any other storage.
-        # More in general, it is used to perform any action after the crew has finished executing.
-        # In this case, we are logging the results to the console.
-        print("Crew execution completed with result:", result.json)
-        return result.json
 
     @agent
     def researcher(self) -> Agent:
         return Agent(
             config=self.agents_config["researcher"],  # type: ignore[index]
             verbose=True,
+            llm=self.llm,
             tools=[SerperScrapeTool(), SerperDevTool()],
         )
 
     @agent
     def reporting_analyst(self) -> Agent:
         return Agent(
-            from_repository="reporting-analyst",
-            # knowledge_sources=[self.text_source],
-            reasoning=True,
+            config=self.agents_config["reporting_analyst"],  # type: ignore[index]
+            llm=self.llm,
+            verbose=True,
         )
 
     @task
     def research_task(self) -> Task:
         return Task(
             config=self.tasks_config["research_task"],  # type: ignore[index]
-            # guardrail=LLMGuardrail(
-            #     description="The research task should be detailed and strictly related to the topic.",
-            #     llm=LLM(
-            #         model="openai/openai/gpt-4o",
-            #         base_url=os.getenv("OPENAI_API_BASE"),
-            #         api_key=os.getenv("OPENAI_API_KEY"),
-            #         temperature=0.2,
-            #     ),
-            # ),
+            async_execution=True,
         )
 
     @task
@@ -122,14 +94,22 @@ class CrewaiTrainigStepByStep:
         return Task(
             config=self.tasks_config["reporting_task"],  # type: ignore[index]
             output_file="report.md",
-            # guardrail=validate_content_length,
+            async_execution=True,
         )
 
     @task
     def summarization_task(self) -> Task:
         return Task(
             config=self.tasks_config["summarization_task"],  # type: ignore[index]
-            output_json=SummarizationOutput,
+            output_pydantic=SummarizationOutput,
+            async_execution=False,
+            guardrail=LLMGuardrail(
+                description="Ensure the output follows the SummarizationOutput schema.",
+                llm=self.llm,
+            ),
+            context=[
+                self.reporting_task()
+            ]
         )
 
     @crew
@@ -137,11 +117,17 @@ class CrewaiTrainigStepByStep:
         """Creates the CrewaiTrainigStepByStep crew"""
 
         return Crew(
-            agents=self.agents,  # Automatically created by the @agent decorator
-            tasks=self.tasks,  # Automatically created by the @task decorator
-            process=Process.sequential,
+            agents=self.agents,
+            tasks=self.tasks,
+            manager_agent=self.manager_agent(),
+            process=Process.hierarchical,
             verbose=True,
-            # memory=True,
-            # embedder=get_embedder_config(),  # Try simplest approach first!
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
+            output_log_file="crew_log.json",
+            knowledge_sources=[TextFileKnowledgeSource(
+                    file_paths=["user_preference.txt"],
+                )
+            ],
+            tracing=True,
+            memory=True,
+            embedder=embedding_model
         )

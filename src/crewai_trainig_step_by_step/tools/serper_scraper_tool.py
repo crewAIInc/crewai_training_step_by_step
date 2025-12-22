@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Optional, Type
+from typing import Type
 
 import requests
 from crewai.tools import BaseTool

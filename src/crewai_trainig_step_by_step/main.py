@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 import sys
 import warnings
+import asyncio
 
 from datetime import datetime
+
+from crewai_tools.tools.stagehand_tool.stagehand_tool import asyncio
 
 from crewai_trainig_step_by_step.crew import CrewaiTrainigStepByStep
 
@@ -22,10 +25,20 @@ def run():
         'current_year': str(datetime.now().year)
     }
     
-    try:
-        CrewaiTrainigStepByStep().crew().kickoff(inputs=inputs)
-    except Exception as e:
-        raise Exception(f"An error occurred while running the crew: {e}")
+    # try:
+
+    # asyncio.run(
+    crew_app = CrewaiTrainigStepByStep()
+    crew_app.crew().kickoff(inputs=inputs)
+
+    task_output = crew_app.summarization_task()
+
+    if task_output.pydantic:
+        print("Pydantic Output:", task_output.pydantic)
+        for k, v in task_output.pydantic.key_points:
+            print(f"{k}: {v}")
+    # except Exception as e:
+    #     raise Exception(f"An error occurred while running the crew: {e}")
 
 
 def train():
