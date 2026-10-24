@@ -70,7 +70,7 @@ class CrewaiTrainigStepByStep:
     def prepare_inputs(self, inputs):
         # Preprocess or modify inputs, that will be accessible in the 'inputs'
         # parameter of the crew. In our case, we have two inputs: topic and current_year.
-        # Let's modify slightly the topic, by overriding it with an hardcoded option.
+        # Let's modify slightly the topic, by overriding it with a hardcoded option.
         # This method is often used to fetch external data such as s3 or any
         # other cloud bucket.
 
@@ -81,7 +81,7 @@ class CrewaiTrainigStepByStep:
     @after_kickoff
     def log_results(self, result):
         # This method is often used to save the results to a file or any other storage.
-        # More in general, it is used to perform any action after the crew has finished executing.
+        # More generally, it is used to perform any action after the crew has finished executing.
         # In this case, we are logging the results to the console.
         print("Crew execution completed with result:", result.json)
         return result.json
